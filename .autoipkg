@@ -1,0 +1,4 @@
+SOURCE=svn://www.sidske.com:8080/mbinputmgr
+DEPS="xlibs, libxft2, libmb1"
+DESC="A tray application for managing software input methods"
+INTERACTIVE=n
