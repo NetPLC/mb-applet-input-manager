@@ -1,6 +1,6 @@
 # Process this file with autoconf to produce a configure script.
 AC_INIT(mbinputmgr.c)
-AM_INIT_AUTOMAKE(mbinputmgr, 0.6)
+AM_INIT_AUTOMAKE(mb-applet-input-manager, 0.6)
 AM_CONFIG_HEADER(config.h)
 
 MB_LIBS=""
