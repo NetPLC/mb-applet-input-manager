@@ -32,6 +32,7 @@ int            TrayAppLen   = 0; 	/* len of tar app */
 MBInpmgrState *Inpmgr_state = NULL;
 Bool           ButtonIsDown = False;
 int            ButtonActive;
+Atom           AtomIMActivate;
 
 typedef struct ButtonImgs {
   
@@ -59,6 +60,9 @@ paint_callback ( MBTrayApp *app, Drawable drw )
 
   img_bg = mb_tray_app_get_background (app, Pixbuf);
 
+  if (img_bg == NULL)
+    return;
+
   button = (ButtonImgs*)Inpmgr_state->MethodSelected->data;
 
   if (ButtonIsDown)
@@ -81,6 +85,14 @@ paint_callback ( MBTrayApp *app, Drawable drw )
     {
       MBPixbufImage *img_tmp = NULL;
 
+      if (mb_pixbuf_img_get_width(img_bg) != TrayDepth
+	  || mb_pixbuf_img_get_height(img_bg) != TrayAppLen)
+	{
+	  mb_pixbuf_img_free(Pixbuf, img_bg);
+	  return;
+	}
+
+
       /* GREAT BIG FUCKING HACK - 
            app gets expose on orientation change 
            with mb_tray_app_tray_is_vertical = TRUE,
@@ -93,6 +105,7 @@ paint_callback ( MBTrayApp *app, Drawable drw )
       */
       if (mb_pixbuf_img_get_width(img_bg) > mb_pixbuf_img_get_height(img_bg))
 	{
+	  mb_pixbuf_img_render_to_drawable (Pixbuf, img_bg, drw, 0, 0);
 	  mb_pixbuf_img_free(Pixbuf, img_bg);
 	  return;
 	}
@@ -120,6 +133,15 @@ paint_callback ( MBTrayApp *app, Drawable drw )
     }
   else
     {
+
+      if (mb_pixbuf_img_get_width(img_bg) != TrayAppLen
+	  || mb_pixbuf_img_get_height(img_bg) != TrayDepth)
+	{
+	  /* Dont paint till were sized how we want */
+	  mb_pixbuf_img_render_to_drawable (Pixbuf, img_bg, drw, 0, 0);
+	  mb_pixbuf_img_free(Pixbuf, img_bg);
+	  return;
+	}
 
       img_icon = mb_pixbuf_img_scale (Pixbuf, 
 				      img_selected, 
@@ -233,6 +255,26 @@ button_callback (MBTrayApp *app, int x, int y, Bool is_released )
 void
 xevent_callback (MBTrayApp *app, XEvent *ev)
 {
+  if (ev->type == ClientMessage)
+    {
+      printf("beep\n");
+
+      XClientMessageEvent *cmev = (XClientMessageEvent *)&ev->xconfigure;
+
+      if (cmev->message_type == AtomIMActivate)
+	{
+	  printf("beep\n");
+
+	  /* De Activate */
+	  if (cmev->data.l[0] == 0 && mbinputmgr_method_active(Inpmgr_state))
+	    mbinputmgr_toggle_selected_method (Inpmgr_state);
+	  /* Activate  */
+	  else if (cmev->data.l[0] == 1 
+		   && !mbinputmgr_method_active(Inpmgr_state))
+	    mbinputmgr_toggle_selected_method (Inpmgr_state);
+	}
+    }
+
   mb_menu_handle_xevent (PopupMenu, ev);
 }
 
@@ -315,6 +357,10 @@ main(int argc, char **argv)
   Pixbuf = mb_pixbuf_new(mb_tray_app_xdisplay(app), 
 			 mb_tray_app_xscreen(app));
 
+  AtomIMActivate = XInternAtom(mb_tray_app_xdisplay(app), 
+			       "_MB_INPUT_REQUEST", False);
+
+
   PopupMenu = mb_menu_new (mb_tray_app_xdisplay(app),
 			   mb_tray_app_xscreen(app));
 
@@ -351,6 +397,11 @@ main(int argc, char **argv)
   mb_tray_app_set_button_callback (app, button_callback );
 
   /* XXX set up dnotify to reload entrys only on _addition_  */
+
+  XSelectInput(mb_tray_app_xdisplay(app),
+	       mb_tray_app_xrootwin(app),
+	       SubstructureNotifyMask);
+
 
   mb_tray_app_main (app);
 

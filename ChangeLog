@@ -1,0 +1,9 @@
+2004-12-23  mallum,,,  <mallum@openedhand.com>
+
+	* autogen.sh:
+	Update
+	* configure.ac:
+	Bump up version
+	* mbinputmgr-tray.c: (paint_callback), (button_callback),
+	(load_icon), (main):
+	Fix potential segv. Add X CLient Message Activation.

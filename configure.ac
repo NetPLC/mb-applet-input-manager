@@ -1,6 +1,6 @@
 # Process this file with autoconf to produce a configure script.
 AC_INIT(mbinputmgr.c)
-AM_INIT_AUTOMAKE(mbinputmgr, 0.5)
+AM_INIT_AUTOMAKE(mbinputmgr, 0.6)
 AM_CONFIG_HEADER(config.h)
 
 MB_LIBS=""
@@ -34,7 +34,7 @@ if test x$PKG_CONFIG != xno && $PKG_CONFIG --exists libmb; then
 fi
 
 AC_ARG_ENABLE(gnomeapplet,
-  [  --enable-gnomeapplet    Buld GNOME2 Applet.],
+  [  --enable-gnomeapplet    Buld GNOME2 Applet (BROKEN).],
   enable_gnomeapplet=$enableval, enable_gnomeapplet=no)
 
 if test x$enable_gnomeapplet = xyes; then
