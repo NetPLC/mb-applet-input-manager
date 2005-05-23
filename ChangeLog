@@ -1,3 +1,8 @@
+2005-05-23  mallum,,,  <mallum@openedhand.com>
+
+	* mbinputmgr-tray.c: (button_callback), (xevent_callback):
+	Remove random printf, postion menu better for titlebar panels.
+
 2004-12-23  mallum,,,  <mallum@openedhand.com>
 
 	* autogen.sh:
