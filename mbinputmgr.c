@@ -1,5 +1,21 @@
 #include "mbinputmgr.h"
 
+void
+cleanup_children(int s)
+{
+        kill(-getpid(), 15);  /* kill every one in our process group  */
+        exit(0);
+}
+
+void 
+install_signal_handlers(void)
+{
+        signal (SIGCHLD, SIG_IGN);  /* kernel can deal with zombies  */
+        signal (SIGINT, cleanup_children);
+        signal (SIGQUIT, cleanup_children);
+        signal (SIGTERM, cleanup_children);
+}
+
 static void 
 fork_exec(MBInpmgrState *inpmgr, char *cmd)
 {
@@ -97,6 +113,8 @@ mbinpmgr_init(void)
   struct stat stat_info;
   char orig_wd[256];
   int i;
+
+  install_signal_handlers();
 
   inpmgr = malloc(sizeof(MBInpmgrState));
   memset(inpmgr,0,sizeof(MBInpmgrState));
